@@ -1,0 +1,48 @@
+# Desenvolvimento: `docker compose up` sobe banco, API e web com hot reload em http://localhost:5173.
+x-node: &node
+  build: { context: ., dockerfile: docker/dev.Dockerfile }
+  image: lab-dev
+  user: node
+  working_dir: /app
+  volumes: ['.:/app']
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-lab}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lab}
+      POSTGRES_DB: ${POSTGRES_DB:-lab}
+    # Sem porta publicada: acesse com `docker compose exec db psql -U lab`.
+    volumes: [db-data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  install:
+    <<: *node
+    command: pnpm install --frozen-lockfile
+
+  api:
+    <<: *node
+    command: pnpm --filter api dev
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgres://lab:lab@db:5432/lab}
+    # A API fica na rede interna; o navegador chega nela pelo proxy /api do Vite (localhost:5173/api).
+    depends_on:
+      install: { condition: service_completed_successfully }
+      db: { condition: service_healthy }
+
+  web:
+    <<: *node
+    command: pnpm --filter web dev
+    environment:
+      API_URL: http://api:3000
+    ports: ['5173:5173']
+    depends_on:
+      install: { condition: service_completed_successfully }
+
+volumes:
+  db-data:
