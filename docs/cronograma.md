@@ -221,10 +221,10 @@ Tarefas por semana:
 Pronto quando:
 
 - [ ] Jogo flui sem piscar a 60 quadros por segundo em `docker compose -f docker-compose.prod.yml up`
-- [ ] O domínio não conhece o Canvas; a tela só reage aos eventos do `Game`
-- [ ] Save corrompido gera erro tratado e mensagem na tela, sem travar o jogo
-- [ ] Tela de estatísticas usa ao menos uma consulta com `groupBy` e uma com `join`
-- [ ] Ao menos uma melhoria da lista do livro implementada
+- [x] O domínio não conhece o Canvas; a tela só reage aos eventos do `Game`
+- [x] Save corrompido gera erro tratado e mensagem na tela, sem travar o jogo
+- [x] Tela de estatísticas usa ao menos uma consulta com `groupBy` e uma com `join`
+- [x] Ao menos uma melhoria da lista do livro implementada (explosões)
 
 ## Cronograma consolidado
 
