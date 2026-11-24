@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# Portão local antes de publicar: roda `pnpm check` (ESLint, tsc e Vitest) dentro do container.
+#
+#   Pula quando só mudou documentação, quando o commit já foi conferido (cache em .git/pre-push-ok)
+#   ou com SKIP_PRE_PUSH=1.
+
+set -euo pipefail
+
+if [ "${SKIP_PRE_PUSH:-0}" = "1" ]; then
+  exit 0
+fi
+
+zero="0000000000000000000000000000000000000000"
+ok_file="$(git rev-parse --git-dir)/pre-push-ok"
+
+while read -r _ local_sha _ remote_sha; do
+  [ "$local_sha" = "$zero" ] && continue
+  if [ -f "$ok_file" ] && [ "$(cat "$ok_file")" = "$local_sha" ]; then
+    continue
+  fi
+
+  base="$remote_sha"
+  if [ "$base" = "$zero" ]; then
+    base="$(git merge-base "$local_sha" origin/main 2>/dev/null || true)"
+  fi
+  if [ -n "$base" ] && ! git diff --name-only "$base" "$local_sha" | grep -qvE '^(docs/|README\.md|CLAUDE\.md)'; then
+    continue
+  fi
+
+  echo "→ pre-push: pnpm check no container..." >&2
+  if ! docker compose run --rm --no-deps -T install sh -c "pnpm install --frozen-lockfile >/dev/null && pnpm check" >&2; then
+    echo "✗ pnpm check falhou: nada foi publicado. Corrija e tente de novo (SKIP_PRE_PUSH=1 pula, só em último caso)." >&2
+    exit 1
+  fi
+  echo "$local_sha" > "$ok_file"
+done

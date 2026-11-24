@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# Branch e tamanho do commit (gitflow).
+#
+#   Branch:  <prefixo>/<nome>, com prefixo feature, fix, refactor, hotfix, test, style ou release.
+#            Nunca se commita direto em master, main ou develop.
+#   Tamanho: no máximo 6 arquivos por commit; com mais de um arquivo, no máximo 600 linhas alteradas
+#            (arquivos de lock e binários não contam). Um arquivo só não tem limite de linhas.
+
+set -euo pipefail
+
+MAX_FILES=6
+MAX_LINES=600
+
+branch="$(git symbolic-ref --short -q HEAD || true)"
+if [ -n "$branch" ]; then
+  case "$branch" in
+    master|main|develop)
+      echo "✗ Não se commita direto em $branch. Crie uma branch: git switch -c feature/<nome>" >&2
+      exit 1 ;;
+  esac
+  if ! printf '%s' "$branch" | grep -Eq '^(feature|fix|refactor|hotfix|test|style|release)/[A-Za-z0-9._/-]+$'; then
+    echo "✗ Branch \"$branch\" fora do padrão. Use <prefixo>/<nome>, com prefixo feature, fix, refactor, hotfix, test, style ou release." >&2
+    exit 1
+  fi
+fi
+
+mapfile -t files < <(git diff --cached --name-only --diff-filter=ACMRD)
+[ "${#files[@]}" -eq 0 ] && exit 0
+
+if [ "${#files[@]}" -gt "$MAX_FILES" ]; then
+  {
+    echo "✗ Commit bloqueado: ${#files[@]} arquivos (limite: $MAX_FILES)."
+    echo "  Quebre em commits menores. Dica: git restore --staged <arquivos>"
+  } >&2
+  exit 1
+fi
+
+if [ "${#files[@]}" -gt 1 ]; then
+  total=0
+  while IFS=$'\t' read -r added deleted path; do
+    [ "$added" = "-" ] && continue
+    case "$path" in
+      *composer.lock|*package-lock.json|*yarn.lock|*pnpm-lock.yaml) continue ;;
+    esac
+    total=$((total + added + deleted))
+  done < <(git diff --cached --numstat)
+
+  if [ "$total" -gt "$MAX_LINES" ]; then
+    {
+      echo "✗ Commit bloqueado: $total linhas alteradas em ${#files[@]} arquivos (limite: $MAX_LINES)."
+      echo "  Quebre em passos menores, cada um funcionando sozinho."
+    } >&2
+    exit 1
+  fi
+fi
+
+exit 0

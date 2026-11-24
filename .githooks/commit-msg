@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Formato da mensagem de commit:
+#   1. Título: tipo(escopo): descrição. Tipos: feat|fix|refactor|test|docs|style|chore|ci|perf|build.
+#      O escopo fica em minúsculas, com letras, números, ., _, / ou -. "merge" e "hotfix" não são tipos.
+#   2. A mensagem inteira (título, corpo e ID) tem no máximo 200 caracteres.
+#   3. Sem autor nem co-autor: Co-Authored-By, Signed-off-by, Author:, "Generated with" e "Claude Code" são barrados.
+# Ex.: feat(identity): cadastro de usuário (USR-02)
+
+set -euo pipefail
+export LC_ALL=C.UTF-8
+
+message="$(grep -v '^#' "$1" || true)"
+message="${message%"${message##*[![:space:]]}"}"
+first_line="$(printf '%s\n' "$message" | head -n1)"
+
+types='feat|fix|refactor|test|docs|style|chore|ci|perf|build'
+pattern="^($types)\([a-z0-9._/-]+\): .+"
+
+if ! printf '%s' "$first_line" | grep -Eq "$pattern"; then
+  {
+    echo "✗ Título fora do padrão: \"$first_line\""
+    echo "  Use: tipo(escopo): descrição"
+    echo "  Tipos: ${types//|/, } (escopo em minúsculas: letras, números, ., _, / ou -)"
+    echo "  Ex.: feat(identity): cadastro de usuário (USR-02)"
+  } >&2
+  exit 1
+fi
+
+if [ "${#message}" -gt 200 ]; then
+  echo "✗ A mensagem tem ${#message} caracteres (máximo: 200, contando título, corpo e ID)." >&2
+  exit 1
+fi
+
+if printf '%s' "$message" | grep -Eiq 'co-authored-by|signed-off-by|^author:|generated with|claude code'; then
+  echo "✗ A mensagem não pode ter autor nem co-autor (Co-Authored-By, Signed-off-by, Author:, Generated with, Claude Code)." >&2
+  exit 1
+fi
+
+exit 0
