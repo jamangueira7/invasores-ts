@@ -6,3 +6,5 @@ export * from './stars';
 export * from './invader';
 export * from './player-ship';
 export * from './game';
+export * from './results';
+export * from './save';
