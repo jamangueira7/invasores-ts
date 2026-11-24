@@ -54,6 +54,19 @@ services:
     depends_on:
       install: { condition: service_completed_successfully }
 
+  # E2E com Playwright (nada instalado no host): `make e2e` ou `make screenshot`. Fora do `up` normal.
+  e2e:
+    profiles: [e2e]
+    image: mcr.microsoft.com/playwright:v1.49.1-noble
+    user: '1000:1000'
+    working_dir: /app
+    volumes: ['.:/app']
+    environment:
+      HOME: /tmp
+      E2E_BASE_URL: http://web:5173
+    command: npx --yes pnpm@9.15.0 --filter e2e e2e
+    depends_on: [web, api]
+
 volumes:
   db-data:
   saves:
