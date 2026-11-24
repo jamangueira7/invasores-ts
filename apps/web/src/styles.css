@@ -48,6 +48,10 @@ input {
   font: inherit;
 }
 
+a {
+  color: var(--stinger);
+}
+
 .muted {
   color: var(--muted);
   font-size: 0.9rem;

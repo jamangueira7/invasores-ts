@@ -58,7 +58,7 @@ export function MenuScreen({ onPlay, onStats, onLoad, loadError }: MenuProps) {
         </p>
       )}
       <p className="keys muted">
-        <kbd>←</kbd> <kbd>→</kbd> andam · <kbd>Espaço</kbd> atira · <kbd>P</kbd> pausa
+        <kbd>←</kbd> <kbd>→</kbd> andam · <kbd>Espaço</kbd> atira · <kbd>P</kbd> pausa · <a href="#/debug">debug do save</a>
       </p>
     </section>
   );

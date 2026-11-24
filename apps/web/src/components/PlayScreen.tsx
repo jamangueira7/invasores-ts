@@ -24,6 +24,7 @@ export function PlayScreen({ game, onGameOver, onQuit, onSave }: Props) {
     const canvas = canvasRef.current;
     if (!canvas) return;
     (boardRef.current as ScoreBoard | null)!.game = game;
+    if (import.meta.env.DEV) (window as { game?: Game }).game = game; // inspeção no console
     const controller = new AbortController();
     const togglePause = () => {
       game.togglePause();
@@ -93,7 +94,7 @@ export function PlayScreen({ game, onGameOver, onQuit, onSave }: Props) {
               </button>
             </div>
             {saveMsg && (
-              <p className="hint" role="status">
+              <p className={saveMsg.startsWith('Não') ? 'hint' : 'muted'} role="status">
                 {saveMsg}
               </p>
             )}

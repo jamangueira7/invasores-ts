@@ -51,9 +51,9 @@ export function StatsScreen({ onBack }: { onBack: () => void }) {
                   <tr>
                     <th>#</th>
                     <th>Piloto</th>
-                    <th>Recorde</th>
-                    <th>Onda</th>
-                    <th>Partidas</th>
+                    <th className="num">Recorde</th>
+                    <th className="num">Onda</th>
+                    <th className="num">Partidas</th>
                   </tr>
                 </thead>
                 <tbody>
