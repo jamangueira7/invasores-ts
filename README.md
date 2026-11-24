@@ -1,5 +1,7 @@
 # Invasores TS
 
+![Partida de Invasores com a formação e o placar](docs/screenshot.png)
+
 Jogo de nave contra ondas de invasores, com tiros, vidas, pontuação e estrelas piscando. Laboratório do **Use a Cabeça! C#** reescrito em **TypeScript**, com a mesma estrutura do
 [corrida-cachorro-ts](https://github.com/jamangueira7/corrida-cachorro-ts): React + Vite, Fastify, Postgres com
 Kysely, Vitest e tudo subindo com Docker.
@@ -23,10 +25,23 @@ docker compose up -d          # ou: make up
 
 ```
 packages/domain/   classes do livro em TS puro + testes (Vitest)
-apps/web/          React + Vite
-apps/api/          Fastify + Kysely, migrations em src/migrations
+apps/web/          React + Vite (testes de tela com Testing Library + jsdom)
+apps/api/          Fastify + Kysely, migrations em src/migrations (testes de integração *.int.test.ts)
+e2e/               Playwright (roda no Docker)
 docs/cronograma.md plano dos três laboratórios
 ```
+
+## Testes
+
+```bash
+make check        # lint + tipos + unitários (domínio, tela e API sem banco)
+make test-int     # API contra Postgres real (banco lab_test, criado na hora)
+make e2e          # Playwright no Docker, contra o app em http://web:5173
+make screenshot   # joga uma partida e regrava docs/screenshot.png
+```
+
+`make e2e`, `make test-int` e `make screenshot` precisam do app no ar (`make up`). O `make check` é o que o hook de
+pre-push roda; os de integração e E2E ficam de fora dele.
 
 ## Desenvolvimento
 
