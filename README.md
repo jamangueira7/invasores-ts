@@ -14,8 +14,8 @@ Pré-requisito: Docker com Compose. Não precisa de Node na máquina.
 docker compose up -d          # ou: make up
 ```
 
-- App: http://localhost:5173
-- API (pelo proxy do Vite): http://localhost:5173/api/health
+- App: http://localhost:5175
+- API (pelo proxy do Vite): http://localhost:5175/api/health
 - Banco: `docker compose exec db psql -U lab`
 - Produção (nginx + Node compilado): `make prod` → http://localhost:8080
 

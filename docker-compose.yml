@@ -1,4 +1,4 @@
-# Desenvolvimento: `docker compose up` sobe banco, API e web com hot reload em http://localhost:5173.
+# Desenvolvimento: `docker compose up` sobe banco, API e web com hot reload em http://localhost:5175.
 x-node: &node
   build: { context: ., dockerfile: docker/dev.Dockerfile }
   image: lab-dev
@@ -25,14 +25,24 @@ services:
     <<: *node
     command: pnpm install --frozen-lockfile
 
+  # O volume nasce do root; este passo único o entrega ao usuário node da API.
+  saves-init:
+    image: lab-dev
+    user: root
+    command: chown node:node /data/saves
+    volumes: [saves:/data/saves]
+
   api:
     <<: *node
     command: pnpm --filter api dev
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgres://lab:lab@db:5432/lab}
-    # A API fica na rede interna; o navegador chega nela pelo proxy /api do Vite (localhost:5173/api).
+      SAVE_DIR: /data/saves
+    volumes: ['.:/app', 'saves:/data/saves']
+    # A API fica na rede interna; o navegador chega nela pelo proxy /api do Vite (localhost:5175/api).
     depends_on:
       install: { condition: service_completed_successfully }
+      saves-init: { condition: service_completed_successfully }
       db: { condition: service_healthy }
 
   web:
@@ -40,9 +50,10 @@ services:
     command: pnpm --filter web dev
     environment:
       API_URL: http://api:3000
-    ports: ['5173:5173']
+    ports: ['5175:5173']
     depends_on:
       install: { condition: service_completed_successfully }
 
 volumes:
   db-data:
+  saves:

@@ -1,7 +1,7 @@
 .PHONY: up down logs test check prod
 
 up:
-	docker compose up -d && echo "→ http://localhost:5173"
+	docker compose up -d && echo "→ http://localhost:5175"
 down:
 	docker compose down
 logs:

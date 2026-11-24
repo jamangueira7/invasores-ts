@@ -18,6 +18,8 @@ services:
     build: { context: ., dockerfile: apps/api/Dockerfile }
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgres://lab:lab@db:5432/lab}
+    # Save do jogo em andamento (JSON) num volume nomeado.
+    volumes: [saves-prod:/data/saves]
     depends_on:
       db: { condition: service_healthy }
     restart: unless-stopped
@@ -30,3 +32,4 @@ services:
 
 volumes:
   db-data-prod:
+  saves-prod:

@@ -27,7 +27,7 @@ Cada repositório é um laboratório do livro reescrito em TypeScript, com o cro
 
 ## Comandos (tudo via Docker; não há Node no host)
 
-- `make up` → web em http://localhost:5173; API em /api pelo proxy do Vite; Postgres só na rede interna.
+- `make up` → web em http://localhost:5175; API em /api pelo proxy do Vite; Postgres só na rede interna.
 - `make check` → ESLint + tsc + Vitest no container (é o que o pre-push roda).
 - `make prod` → build de produção (nginx + Node) em http://localhost:8080.
 
